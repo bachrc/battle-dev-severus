@@ -33,3 +33,6 @@ class ProblemsTest(APITestCase):
         response = self.client.get(url, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertContains(response=response, text=TITRE_PROBLEME_1)
+        self.assertContains(response=response, text=TITRE_PROBLEME_2)
+        self.assertContains(response=response, text="1")
+        self.assertContains(response=response, text="2")
