@@ -1,4 +1,5 @@
 from django.db import models
+
 from lobby.models import Question
 
 
@@ -8,5 +9,9 @@ class Probleme(models.Model):
     contenu = models.CharField(max_length=10000)
     questions = models.ManyToManyField(Question, blank=True)
 
-    def get_question(self) -> Question:
-        return self.questions.first()
+    def get_question(self, user_id: int) -> Question:
+        questions_ids = [question.id for question in self.questions.all()]
+
+        question_id_for_user = questions_ids[user_id % len(questions_ids)]
+
+        return self.questions.get(id=question_id_for_user)

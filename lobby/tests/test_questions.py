@@ -1,5 +1,6 @@
 import logging
 
+from django.contrib.auth.models import User
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -26,6 +27,8 @@ logger = logging.getLogger(__name__)
 
 class ProblemsTest(APITestCase):
     def setUp(self):
+        self.utilisateur1 = User.objects.create(id=1, last_name="Martinet", first_name="Pierre", email="y.bacha@live.fr", username="pmartinet")
+        self.utilisateur2 = User.objects.create(id=2, last_name="Lignac", first_name="Cyril", email="c.lignac@live.fr", username="clignac")
         self.question1 = Question.objects.create(intitule=INTITULE_QUESTION_1, reponse=REPONSE_QUESTION_1)
         self.question2 = Question.objects.create(intitule=INTITULE_QUESTION_2, reponse=REPONSE_QUESTION_2)
         self.question3 = Question.objects.create(intitule=INTITULE_QUESTION_3, reponse=REPONSE_QUESTION_3)
@@ -52,3 +55,9 @@ class ProblemsTest(APITestCase):
         self.assertContains(response=response, text=ID_PROBLEME_1)
         self.assertContains(response=response, text=TITRE_PROBLEME_1)
         self.assertContains(response=response, text=CONTENU_PROBLEME_1)
+
+    def test_should_get_different_questions_for_different_users(self):
+        question1: Question = self.probleme1.get_question(self.utilisateur1.id)
+        question2: Question = self.probleme1.get_question(self.utilisateur2.id)
+
+        self.assertNotEqual(question1.id, question2.id)

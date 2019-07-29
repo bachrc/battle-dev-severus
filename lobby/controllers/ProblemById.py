@@ -14,7 +14,7 @@ class ProblemsById(APIView):
         if probleme is None:
             raise Http404
 
-        question = probleme.get_question()
+        question = probleme.get_question(user_id=1)
 
         dto = ProblemDTO(
             id_problem=probleme.id,
