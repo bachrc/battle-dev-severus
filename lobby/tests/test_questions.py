@@ -1,3 +1,5 @@
+import logging
+
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -18,6 +20,8 @@ INTITULE_QUESTION_2 = "Pourquoi n'a-t-on pas encore viré Roberto ?"
 REPONSE_QUESTION_2 = "Car il est là depuis bien trop longtemps et ça couterait trop cher de le virer !"
 INTITULE_QUESTION_3 = "Comment dit-on \"Salade de pommes de terre\" en Allemand ?"
 REPONSE_QUESTION_3 = "Kartoffelnsalat"
+
+logger = logging.getLogger(__name__)
 
 
 class ProblemsTest(APITestCase):

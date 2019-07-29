@@ -7,3 +7,6 @@ class Probleme(models.Model):
     titre = models.CharField(max_length=100)
     contenu = models.CharField(max_length=10000)
     questions = models.ManyToManyField(Question, blank=True)
+
+    def get_question(self) -> Question:
+        return self.questions.first()
