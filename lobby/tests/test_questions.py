@@ -39,3 +39,12 @@ class ProblemsTest(APITestCase):
         self.assertContains(response=response, text=TITRE_PROBLEME_2)
         self.assertContains(response=response, text=ID_PROBLEME_1)
         self.assertContains(response=response, text=ID_PROBLEME_2)
+
+    def test_should_get_problem_details(self):
+        url = reverse('problem-by-id', kwargs={'problem_id': ID_PROBLEME_1})
+        response = self.client.get(url, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertContains(response=response, text=ID_PROBLEME_1)
+        self.assertContains(response=response, text=TITRE_PROBLEME_1)
+        self.assertContains(response=response, text=CONTENU_PROBLEME_1)
