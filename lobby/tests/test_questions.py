@@ -1,11 +1,11 @@
 import logging
 
-from django.contrib.auth.models import User
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
 from lobby.models import Question, Probleme
+from lobby.models import Utilisateur
 
 ID_PROBLEME_1 = 1
 ID_PROBLEME_2 = 2
@@ -27,8 +27,10 @@ logger = logging.getLogger(__name__)
 
 class ProblemsTest(APITestCase):
     def setUp(self):
-        self.utilisateur1 = User.objects.create(id=1, last_name="Martinet", first_name="Pierre", email="y.bacha@live.fr", username="pmartinet")
-        self.utilisateur2 = User.objects.create(id=2, last_name="Lignac", first_name="Cyril", email="c.lignac@live.fr", username="clignac")
+        self.utilisateur1 = Utilisateur.objects.create_user(id=1, last_name="Martinet", first_name="Pierre",
+                                                            email="p.martinet@live.fr")
+        self.utilisateur2 = Utilisateur.objects.create_user(id=2, last_name="Lignac", first_name="Cyril",
+                                                            email="c.lignac@live.fr")
         self.question1 = Question.objects.create(intitule=INTITULE_QUESTION_1, reponse=REPONSE_QUESTION_1)
         self.question2 = Question.objects.create(intitule=INTITULE_QUESTION_2, reponse=REPONSE_QUESTION_2)
         self.question3 = Question.objects.create(intitule=INTITULE_QUESTION_3, reponse=REPONSE_QUESTION_3)

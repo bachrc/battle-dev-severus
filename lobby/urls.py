@@ -1,8 +1,7 @@
 from django.urls import path
 from rest_framework.urlpatterns import format_suffix_patterns
 
-from lobby.controllers.ProblemById import ProblemsById
-from lobby.controllers.ProblemsList import ProblemsList
+from lobby.controllers.Problems import ProblemsList, ProblemsById
 
 urlpatterns = [
     path('problems/', ProblemsList.as_view(), name="problems-list"),

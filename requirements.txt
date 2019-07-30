@@ -1,3 +1,5 @@
+PyJWT
+djangorestframework-jwt
 Django==2.2.3
 django-cors-headers==3.0.2
 djangorestframework==3.10.1
