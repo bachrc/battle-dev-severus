@@ -1,4 +1,4 @@
-openapi: "3.0"
+openapi: "3.0.0"
 info:
   description: "This describes how to talk to the Battle Dev Severus. Be nice with him."
   version: "1.0.0"
@@ -59,6 +59,30 @@ paths:
         404:
           description: "Problem not found"
 
+  /login:
+    post:
+      tags:
+        - "authentication"
+      summary: "Authentication endpoint"
+      description: "Returns the authentication JWT Token"
+      operationId: "login"
+      requestBody:
+        description: "The body for the authentication"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        200:
+          description: "successful login"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginSuccess'
+        401:
+          description: "invalid credentials"
+
 components:
   schemas:
     ProblemSummary:
@@ -78,3 +102,19 @@ components:
               type: string
             question:
               type: string
+
+    LoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+
+    LoginSuccess:
+      type: object
+      properties:
+        name:
+          type: string
+        token:
+          type: string
