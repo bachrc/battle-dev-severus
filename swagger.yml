@@ -83,7 +83,33 @@ paths:
         401:
           description: "invalid credentials"
 
+  /whoami:
+    get:
+      tags:
+        - "authentication"
+      summary: "Get details on yourself"
+      description: "Returns detailed on the connected user"
+      operationId: "whoami"
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: "success"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Whoami'
+        401:
+          description: "not connected"
+
+
 components:
+  securitySchemes:
+    bearerAuth:            # arbitrary name for the security scheme
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
   schemas:
     ProblemSummary:
       type: object
@@ -117,4 +143,15 @@ components:
         name:
           type: string
         token:
+          type: string
+
+    Whoami:
+      type: object
+      properties:
+        id_utilisateur:
+          type: integer
+          format: int64
+        prenom:
+          type: string
+        nom:
           type: string
