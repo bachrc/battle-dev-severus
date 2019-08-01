@@ -5,7 +5,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from lobby.models import Question, Probleme
-from lobby.models import Utilisateur
+from users.models import Utilisateur
 
 ID_PROBLEME_1 = 1
 ID_PROBLEME_2 = 2

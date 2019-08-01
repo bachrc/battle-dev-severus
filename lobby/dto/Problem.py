@@ -5,4 +5,11 @@ class Problem:
         self.title = title
         self.id = id_problem
 
-
+    @property
+    def data(self):
+        return {
+            "id": self.id,
+            "titre": self.title,
+            "contenu": self.contenu,
+            "question": self.question
+        }

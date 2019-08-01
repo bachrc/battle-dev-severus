@@ -8,13 +8,3 @@ class ProblemsListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Probleme
         fields = ['id', 'titre']
-
-
-class ProblemSerializer(serializers.BaseSerializer):
-    def to_representation(self, problem: ProblemDTO):
-        return {
-            "id": problem.id,
-            "titre": problem.title,
-            "contenu": problem.contenu,
-            "question": problem.question
-        }

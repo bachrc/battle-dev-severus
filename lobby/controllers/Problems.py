@@ -34,6 +34,4 @@ class ProblemsById(APIView):
             question=question.intitule
         )
 
-        serializer = serializers.ProblemSerializer(dto)
-
-        return Response(serializer.data)
+        return Response(dto.data)
