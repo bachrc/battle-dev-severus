@@ -1,10 +1,9 @@
-import jwt
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from battledevseverus import settings
 from users.models import Utilisateur
+from users.tests.auth_utils import compute_auth_header
 
 ID_UTILISATEUR_1 = 1
 PRENOM_UTILISATEUR_1 = "Pierre"
@@ -23,20 +22,9 @@ class WhoamiTest(APITestCase):
                                                            password=PASS_UTILISATEUR_1)
 
     def test_should_return_correct_info_for_whoami(self):
-        url_login = reverse('login')
-        response_login = self.client.post(url_login, {
-            "email": MAIL_UTILISATEUR_1,
-            "password": PASS_UTILISATEUR_1
-        }, format='json')
-
-        self.assertEqual(response_login.status_code, status.HTTP_200_OK)
-        self.assertTrue("token" in response_login.data)
+        auth_headers = compute_auth_header(self.client, MAIL_UTILISATEUR_1, PASS_UTILISATEUR_1)
 
         url_whoami = reverse("whoami")
-        auth_headers = {
-            'HTTP_AUTHORIZATION': 'Bearer ' + (response_login.data["token"].decode()),
-        }
-
         response_whoami = self.client.get(url_whoami, **auth_headers)
         print(response_whoami)
         self.assertEqual(response_whoami.status_code, status.HTTP_200_OK)

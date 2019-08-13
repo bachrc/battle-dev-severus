@@ -4,8 +4,17 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from lobby.models import Question, Probleme
+from lobby.models import Question, Probleme, BonneReponse
 from users.models import Utilisateur
+from users.tests.auth_utils import compute_auth_header
+
+PASS_UTILISATEUR_2 = "miammanger"
+
+MAIL_UTILISATEUR_2 = "c.lignac@live.fr"
+
+PASS_UTILISATEUR_1 = "intraitable"
+
+MAIL_UTILISATEUR_1 = "p.martinet@live.fr"
 
 ID_PROBLEME_1 = 1
 ID_PROBLEME_2 = 2
@@ -28,9 +37,10 @@ logger = logging.getLogger(__name__)
 class ProblemsTest(APITestCase):
     def setUp(self):
         self.utilisateur1 = Utilisateur.objects.create_user(id=1, last_name="Martinet", first_name="Pierre",
-                                                            email="p.martinet@live.fr")
+                                                            email=MAIL_UTILISATEUR_1, password=PASS_UTILISATEUR_1)
         self.utilisateur2 = Utilisateur.objects.create_user(id=2, last_name="Lignac", first_name="Cyril",
-                                                            email="c.lignac@live.fr")
+                                                            email=MAIL_UTILISATEUR_2, password=PASS_UTILISATEUR_2)
+
         self.question1 = Question.objects.create(intitule=INTITULE_QUESTION_1, reponse=REPONSE_QUESTION_1)
         self.question2 = Question.objects.create(intitule=INTITULE_QUESTION_2, reponse=REPONSE_QUESTION_2)
         self.question3 = Question.objects.create(intitule=INTITULE_QUESTION_3, reponse=REPONSE_QUESTION_3)
@@ -42,7 +52,9 @@ class ProblemsTest(APITestCase):
 
     def test_should_fetch_problems_summaries(self):
         url = reverse('problems-list')
-        response = self.client.get(url, format='json')
+        auth_headers = compute_auth_header(self.client, MAIL_UTILISATEUR_1, PASS_UTILISATEUR_1)
+        response = self.client.get(url, format='json', **auth_headers)
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertContains(response=response, text=TITRE_PROBLEME_1)
         self.assertContains(response=response, text=TITRE_PROBLEME_2)
@@ -51,7 +63,8 @@ class ProblemsTest(APITestCase):
 
     def test_should_get_problem_details(self):
         url = reverse('problem-by-id', kwargs={'problem_id': ID_PROBLEME_1})
-        response = self.client.get(url, format='json')
+        auth_headers = compute_auth_header(self.client, MAIL_UTILISATEUR_1, PASS_UTILISATEUR_1)
+        response = self.client.get(url, format='json', **auth_headers)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertContains(response=response, text=ID_PROBLEME_1)
@@ -63,3 +76,8 @@ class ProblemsTest(APITestCase):
         question2: Question = self.probleme1.get_question(self.utilisateur2.id)
 
         self.assertNotEqual(question1.id, question2.id)
+
+    def test_should_not_access_problems_if_not_authenticated(self):
+        url = reverse('problems-list')
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)

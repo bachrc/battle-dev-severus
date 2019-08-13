@@ -119,6 +119,8 @@ components:
           format: int64
         title:
           type: string
+        accessible:
+          type: boolean
     Problem:
       allOf:
         - $ref: '#/components/schemas/ProblemSummary'

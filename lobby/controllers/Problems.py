@@ -1,4 +1,5 @@
 from django.http import Http404
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -10,6 +11,7 @@ from lobby.serializers import ProblemsListSerializer
 
 
 class ProblemsList(APIView):
+    permission_classes = (IsAuthenticated,)
 
     def get(self, request):
         problems = Probleme.objects.all()
@@ -19,6 +21,7 @@ class ProblemsList(APIView):
 
 
 class ProblemsById(APIView):
+    permission_classes = (IsAuthenticated,)
 
     def get(self, request, problem_id: int):
         probleme = Probleme.objects.get(id=problem_id)
