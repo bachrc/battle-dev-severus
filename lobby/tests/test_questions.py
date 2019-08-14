@@ -57,6 +57,10 @@ class ProblemsTest(APITestCase):
         self.probleme2 = Probleme.objects.create(id=13, titre="c'est un probleme", contenu="on voit pas", index=2)
         self.probleme3 = Probleme.objects.create(id=14, titre="epoustouflan", contenu="on voit pas", index=1)
 
+    def setupProblemsWithAGoodAnswer(self):
+        self.setUpOrderedProblems()
+        BonneReponse.objects.create(probleme=self.probleme3, utilisateur=self.utilisateur1)
+
     # test methods
 
     def test_should_fetch_problems_summaries(self):
@@ -119,4 +123,15 @@ class ProblemsTest(APITestCase):
 
         self.assertTrue(response.data[0]["accessible"])
         self.assertFalse(response.data[1]["accessible"])
+        self.assertFalse(response.data[2]["accessible"])
+
+    def test_should_take_in_order_when_good_answers_are_given(self):
+        self.setupProblemsWithAGoodAnswer()
+
+        url = reverse('problems-list')
+        auth_headers = compute_auth_header(self.client, MAIL_UTILISATEUR_1, PASS_UTILISATEUR_1)
+        response = self.client.get(url, format='json', **auth_headers)
+
+        self.assertTrue(response.data[0]["accessible"])
+        self.assertTrue(response.data[1]["accessible"])
         self.assertFalse(response.data[2]["accessible"])
