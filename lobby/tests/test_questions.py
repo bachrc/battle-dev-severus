@@ -18,11 +18,14 @@ MAIL_UTILISATEUR_1 = "p.martinet@live.fr"
 
 ID_PROBLEME_1 = 1
 ID_PROBLEME_2 = 2
+ID_PROBLEME_3 = 3
 
 TITRE_PROBLEME_1 = "Roberto le sacré coquin"
 CONTENU_PROBLEME_1 = "Roberto est l'homme de ménage de l'archiduchesse"
 TITRE_PROBLEME_2 = "Epreuve d'allemand"
 CONTENU_PROBLEME_2 = "C'est important de bien connaitre l'allemand, voici vos questions."
+TITRE_PROBLEME_3 = "Une blague vraiment marrante"
+CONTENU_PROBLEME_3 = "Faites moi confiance, cette blague est vraiment sympa."
 
 INTITULE_QUESTION_1 = "Les chaussettes de l'archiduchesse sont-elles sèches ?"
 REPONSE_QUESTION_1 = "Non, Roberto les a encore oublié dans la machine du coup elles ont moisi, sacré Roberto"
@@ -30,6 +33,8 @@ INTITULE_QUESTION_2 = "Pourquoi n'a-t-on pas encore viré Roberto ?"
 REPONSE_QUESTION_2 = "Car il est là depuis bien trop longtemps et ça couterait trop cher de le virer !"
 INTITULE_QUESTION_3 = "Comment dit-on \"Salade de pommes de terre\" en Allemand ?"
 REPONSE_QUESTION_3 = "Kartoffelnsalat"
+INTITULE_QUESTION_4 = "Comment les abeilles communiquent-elles ?"
+REPONSE_QUESTION_4 = "Par e-miel"
 
 logger = logging.getLogger(__name__)
 
@@ -47,10 +52,15 @@ class ProblemsTest(APITestCase):
         self.question2 = Question.objects.create(intitule=INTITULE_QUESTION_2, reponse=REPONSE_QUESTION_2)
         self.question3 = Question.objects.create(intitule=INTITULE_QUESTION_3, reponse=REPONSE_QUESTION_3)
 
-        self.probleme1 = Probleme.objects.create(id=ID_PROBLEME_1, titre=TITRE_PROBLEME_1, contenu=CONTENU_PROBLEME_1, index=1)
+        self.probleme1 = Probleme.objects.create(id=ID_PROBLEME_1, titre=TITRE_PROBLEME_1, contenu=CONTENU_PROBLEME_1,
+                                                 index=1)
         self.probleme1.questions.add(self.question1, self.question2)
-        self.probleme2 = Probleme.objects.create(id=ID_PROBLEME_2, titre=TITRE_PROBLEME_2, contenu=CONTENU_PROBLEME_2, index=2)
+        self.probleme2 = Probleme.objects.create(id=ID_PROBLEME_2, titre=TITRE_PROBLEME_2, contenu=CONTENU_PROBLEME_2,
+                                                 index=2)
         self.probleme2.questions.add(self.question3)
+        self.probleme3 = Probleme.objects.create(id=ID_PROBLEME_3, titre=TITRE_PROBLEME_3, contenu=CONTENU_PROBLEME_3,
+                                                 index=3)
+        self.probleme3.questions.add(self.question3)
 
     def setUpOrderedProblems(self):
         self.probleme1 = Probleme.objects.create(id=12, titre="eh oui", contenu="on voit pas", index=3)
@@ -135,3 +145,12 @@ class ProblemsTest(APITestCase):
         self.assertTrue(response.data[0]["accessible"])
         self.assertTrue(response.data[1]["accessible"])
         self.assertFalse(response.data[2]["accessible"])
+
+    def test_shouldnt_allow_consulting_a_problem_which_isnt_unlocked(self):
+        self.setupProblemsWithAGoodAnswer()
+
+        url = reverse('problem-by-id', kwargs={'problem_id': 12})
+        auth_headers = compute_auth_header(self.client, MAIL_UTILISATEUR_1, PASS_UTILISATEUR_1)
+        response = self.client.get(url, format='json', **auth_headers)
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
