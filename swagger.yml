@@ -217,7 +217,7 @@ components:
     AnswerResult:
       type: object
       properties:
-        is_correct:
+        correct:
           type: boolean
         details:
           type: string
