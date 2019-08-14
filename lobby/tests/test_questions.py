@@ -35,22 +35,30 @@ logger = logging.getLogger(__name__)
 
 
 class ProblemsTest(APITestCase):
-    def setUp(self):
+
+    def setUp(self) -> None:
         self.utilisateur1 = Utilisateur.objects.create_user(id=1, last_name="Martinet", first_name="Pierre",
                                                             email=MAIL_UTILISATEUR_1, password=PASS_UTILISATEUR_1)
         self.utilisateur2 = Utilisateur.objects.create_user(id=2, last_name="Lignac", first_name="Cyril",
                                                             email=MAIL_UTILISATEUR_2, password=PASS_UTILISATEUR_2)
 
+    def setupClassicProblems(self):
         self.question1 = Question.objects.create(intitule=INTITULE_QUESTION_1, reponse=REPONSE_QUESTION_1)
         self.question2 = Question.objects.create(intitule=INTITULE_QUESTION_2, reponse=REPONSE_QUESTION_2)
         self.question3 = Question.objects.create(intitule=INTITULE_QUESTION_3, reponse=REPONSE_QUESTION_3)
 
-        self.probleme1 = Probleme.objects.create(id=ID_PROBLEME_1, titre=TITRE_PROBLEME_1, contenu=CONTENU_PROBLEME_1)
+        self.probleme1 = Probleme.objects.create(id=ID_PROBLEME_1, titre=TITRE_PROBLEME_1, contenu=CONTENU_PROBLEME_1, index=1)
         self.probleme1.questions.add(self.question1, self.question2)
-        self.probleme2 = Probleme.objects.create(id=ID_PROBLEME_2, titre=TITRE_PROBLEME_2, contenu=CONTENU_PROBLEME_2)
+        self.probleme2 = Probleme.objects.create(id=ID_PROBLEME_2, titre=TITRE_PROBLEME_2, contenu=CONTENU_PROBLEME_2, index=2)
         self.probleme2.questions.add(self.question3)
 
+    def setUpOrderedProblems(self):
+        self.probleme1 = Probleme.objects.create(id=12, titre="eh oui", contenu="on voit pas", index=3)
+        self.probleme2 = Probleme.objects.create(id=13, titre="c'est un probleme", contenu="on voit pas", index=2)
+        self.probleme3 = Probleme.objects.create(id=14, titre="epoustouflan", contenu="on voit pas", index=1)
+
     def test_should_fetch_problems_summaries(self):
+        self.setupClassicProblems()
         url = reverse('problems-list')
         auth_headers = compute_auth_header(self.client, MAIL_UTILISATEUR_1, PASS_UTILISATEUR_1)
         response = self.client.get(url, format='json', **auth_headers)
@@ -62,6 +70,7 @@ class ProblemsTest(APITestCase):
         self.assertContains(response=response, text=ID_PROBLEME_2)
 
     def test_should_get_problem_details(self):
+        self.setupClassicProblems()
         url = reverse('problem-by-id', kwargs={'problem_id': ID_PROBLEME_1})
         auth_headers = compute_auth_header(self.client, MAIL_UTILISATEUR_1, PASS_UTILISATEUR_1)
         response = self.client.get(url, format='json', **auth_headers)
@@ -72,6 +81,7 @@ class ProblemsTest(APITestCase):
         self.assertContains(response=response, text=CONTENU_PROBLEME_1)
 
     def test_should_get_different_questions_for_different_users(self):
+        self.setupClassicProblems()
         question1: Question = self.probleme1.get_question(self.utilisateur1.id)
         question2: Question = self.probleme1.get_question(self.utilisateur2.id)
 
@@ -81,3 +91,19 @@ class ProblemsTest(APITestCase):
         url = reverse('problems-list')
         response = self.client.get(url, format='json')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_should_respect_questions_order(self):
+        self.setUpOrderedProblems()
+
+        url = reverse('problems-list')
+        auth_headers = compute_auth_header(self.client, MAIL_UTILISATEUR_1, PASS_UTILISATEUR_1)
+        response = self.client.get(url, format='json', **auth_headers)
+
+        self.assertEqual(len(response.data), 3)
+        self.assertEqual(response.data[0]["id"], 14)
+        self.assertEqual(response.data[1]["id"], 13)
+        self.assertEqual(response.data[2]["id"], 12)
+
+        self.assertEqual(response.data[0]["index"], 1)
+        self.assertEqual(response.data[1]["index"], 2)
+        self.assertEqual(response.data[2]["index"], 3)

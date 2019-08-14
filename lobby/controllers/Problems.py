@@ -14,7 +14,7 @@ class ProblemsList(APIView):
     permission_classes = (IsAuthenticated,)
 
     def get(self, request):
-        problems = Probleme.objects.all()
+        problems = Probleme.objects.all().order_by('index')
         serializer = ProblemsListSerializer(problems, many=True)
 
         return Response(serializer.data)
