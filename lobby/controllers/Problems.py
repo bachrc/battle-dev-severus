@@ -26,19 +26,20 @@ class ProblemsById(APIView):
     permission_classes = (IsAuthenticated,)
 
     def get(self, request, problem_id: int):
-        probleme = Probleme.objects.get(id=problem_id)
-        if probleme is None:
+        problem = Probleme.objects.get(id=problem_id)
+        if problem is None:
             raise Http404
 
-        if not probleme.check_if_problem_unlocked_for_user(request.user):
+        user = request.user
+        if not problem.check_if_problem_unlocked_for_user(user):
             raise PermissionDenied("Vous n'êtes pas autorisé(e) à consulter ce problème.")
 
-        question = probleme.get_question(user_id=1)
+        question = problem.get_question(user.id)
 
         dto = ProblemDTO(
-            id=probleme.id,
-            title=probleme.titre,
-            contenu=probleme.contenu,
+            id=problem.id,
+            title=problem.titre,
+            contenu=problem.contenu,
             question=question.intitule
         )
 
