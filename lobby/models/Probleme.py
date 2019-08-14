@@ -1,6 +1,7 @@
 from django.db import models
 
 from lobby.models import Question
+from users.models import Utilisateur
 
 
 class Probleme(models.Model):
@@ -16,3 +17,8 @@ class Probleme(models.Model):
         question_id_for_user = questions_ids[user_id % len(questions_ids)]
 
         return self.questions.get(id=question_id_for_user)
+
+    def check_if_problem_unlocked_for_user(self, user: Utilisateur) -> bool:
+        from lobby.models import BonneReponse
+
+        return BonneReponse.objects.filter(probleme=self, utilisateur=user).exists() or self.index == 1

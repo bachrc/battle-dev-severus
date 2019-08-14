@@ -57,6 +57,8 @@ class ProblemsTest(APITestCase):
         self.probleme2 = Probleme.objects.create(id=13, titre="c'est un probleme", contenu="on voit pas", index=2)
         self.probleme3 = Probleme.objects.create(id=14, titre="epoustouflan", contenu="on voit pas", index=1)
 
+    # test methods
+
     def test_should_fetch_problems_summaries(self):
         self.setupClassicProblems()
         url = reverse('problems-list')
@@ -107,3 +109,14 @@ class ProblemsTest(APITestCase):
         self.assertEqual(response.data[0]["index"], 1)
         self.assertEqual(response.data[1]["index"], 2)
         self.assertEqual(response.data[2]["index"], 3)
+
+    def test_should_indicate_accessible_problems_and_those_who_arent(self):
+        self.setUpOrderedProblems()
+
+        url = reverse('problems-list')
+        auth_headers = compute_auth_header(self.client, MAIL_UTILISATEUR_1, PASS_UTILISATEUR_1)
+        response = self.client.get(url, format='json', **auth_headers)
+
+        self.assertTrue(response.data[0]["accessible"])
+        self.assertFalse(response.data[1]["accessible"])
+        self.assertFalse(response.data[2]["accessible"])

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from lobby.dto.Problem import Problem as ProblemDTO
+from lobby.dto.problems import ProblemContent as ProblemDTO
 from lobby.models import Probleme
 
 

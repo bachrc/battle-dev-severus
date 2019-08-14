@@ -117,8 +117,11 @@ components:
         id:
           type: integer
           format: int64
-        title:
+        titre:
           type: string
+        index:
+          type: integer
+          format: int32
         accessible:
           type: boolean
     Problem:
