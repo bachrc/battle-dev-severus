@@ -5,7 +5,7 @@ Ceci est le dépôt du coordinateur de la Battle Dev de la Combe du Lion Vert.
 ## Introduction
 
 Severus a été développé dans le but de coordonner toute la Battle Dev.
-Il a été réalisé en Python 3.7 avec le framework web Django. 
+Il a été réalisé en Python 3.7 avec le framework web Django, le tout en TDD.
 
 Ici, Django ne se charge que des traitements serveur, du "back-end", où il expose
 une interface REST ouverte à quiconque voudrait intéragir avec lui. Le contrat
