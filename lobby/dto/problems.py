@@ -20,3 +20,13 @@ class ProblemAbridged:
     @property
     def data(self):
         return vars(self)
+
+
+class AnswerResult:
+    def __init__(self, correct, details):
+        self.details = details
+        self.correct = correct
+
+    @property
+    def data(self):
+        return vars(self)

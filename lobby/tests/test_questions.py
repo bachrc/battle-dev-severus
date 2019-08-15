@@ -51,6 +51,7 @@ class ProblemsTest(APITestCase):
         self.question1 = Question.objects.create(intitule=INTITULE_QUESTION_1, reponse=REPONSE_QUESTION_1)
         self.question2 = Question.objects.create(intitule=INTITULE_QUESTION_2, reponse=REPONSE_QUESTION_2)
         self.question3 = Question.objects.create(intitule=INTITULE_QUESTION_3, reponse=REPONSE_QUESTION_3)
+        self.question4 = Question.objects.create(intitule=INTITULE_QUESTION_4, reponse=REPONSE_QUESTION_4)
 
         self.probleme1 = Probleme.objects.create(id=ID_PROBLEME_1, titre=TITRE_PROBLEME_1, contenu=CONTENU_PROBLEME_1,
                                                  index=1)
@@ -60,7 +61,7 @@ class ProblemsTest(APITestCase):
         self.probleme2.questions.add(self.question3)
         self.probleme3 = Probleme.objects.create(id=ID_PROBLEME_3, titre=TITRE_PROBLEME_3, contenu=CONTENU_PROBLEME_3,
                                                  index=3)
-        self.probleme3.questions.add(self.question3)
+        self.probleme3.questions.add(self.question4)
 
     def setUpOrderedProblems(self):
         self.probleme1 = Probleme.objects.create(id=12, titre="eh oui", contenu="on voit pas", index=3)
@@ -154,3 +155,17 @@ class ProblemsTest(APITestCase):
         response = self.client.get(url, format='json', **auth_headers)
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_should_allow_good_answer(self):
+        self.setupClassicProblems()
+
+        url = reverse('submit-answer', kwargs={'problem_id': ID_PROBLEME_1})
+        auth_headers = compute_auth_header(self.client, MAIL_UTILISATEUR_1, PASS_UTILISATEUR_1)
+        good_answer = self.probleme1.get_question(self.utilisateur1.id).reponse
+
+        response = self.client.post(url, format='json', data={
+            "reponse": good_answer
+        }, **auth_headers)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(response.data["correct"])

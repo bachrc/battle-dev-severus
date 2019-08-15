@@ -22,9 +22,9 @@ class Probleme(models.Model):
         if self.index == 1:
             return None
 
-        return Probleme.objects.get(index=self.index-1)
+        return Probleme.objects.get(index=self.index - 1)
 
-    def check_if_problem_unlocked_for_user(self, user: Utilisateur) -> bool:
+    def is_problem_unlocked_for_user(self, user: Utilisateur) -> bool:
         from lobby.models import BonneReponse
 
         if self.index == 1:
@@ -33,3 +33,6 @@ class Probleme(models.Model):
         previous_problem = self.fetch_previous_problem()
 
         return BonneReponse.objects.filter(probleme=previous_problem, utilisateur=user).exists()
+
+    def validate_for_user(self, user, answer):
+        pass
