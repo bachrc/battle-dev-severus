@@ -6,4 +6,4 @@ class Question(models.Model):
     reponse = models.CharField(max_length=100)
 
     def is_correct_answer(self, proposal: str) -> bool:
-        return self.reponse.lower() == proposal.lower()
+        return self.reponse.lower() == proposal.lower().strip()

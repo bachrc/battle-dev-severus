@@ -183,3 +183,17 @@ class ProblemsTest(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertTrue(response.data["correct"])
+
+    def test_should_allow_good_answer_even_with_spaces_on_both_sides(self):
+        self.setupClassicProblems()
+
+        url = reverse('submit-answer', kwargs={'problem_id': ID_PROBLEME_1})
+        auth_headers = compute_auth_header(self.client, MAIL_UTILISATEUR_1, PASS_UTILISATEUR_1)
+        good_answer = self.probleme1.get_question(self.utilisateur1.id).reponse
+
+        response = self.client.post(url, format='json', data={
+            "reponse": "   {}  ".format(good_answer.upper())
+        }, **auth_headers)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(response.data["correct"])
