@@ -27,7 +27,7 @@ class ProblemsById(APIView):
 
     def get(self, request, problem_id: int):
         user = request.user
-        problem = get_problem_if_okay(problem_id, user)
+        problem = get_problem_if_allowed(problem_id, user)
 
         question = problem.get_question(user.id)
 
@@ -46,11 +46,12 @@ class ProblemAnswer(APIView):
 
     def post(self, request, problem_id: int):
         user = request.user
-        problem = get_problem_if_okay(problem_id, user)
+        problem = get_problem_if_allowed(problem_id, user)
         question = problem.get_question(user.id)
         answer = request.data["reponse"]
 
         if not question.is_correct_answer(answer):
+            problem.store_invalid_answer(user, answer)
             return Response(AnswerResult(correct=False, details="Réponse incorrecte.").data)
 
         problem.validate_for_user(user)
@@ -58,7 +59,7 @@ class ProblemAnswer(APIView):
         return Response(AnswerResult(correct=True, details="Bonne réponse, bravo !").data)
 
 
-def get_problem_if_okay(problem_id, user) -> Probleme:
+def get_problem_if_allowed(problem_id, user) -> Probleme:
     problem = Probleme.objects.get(id=problem_id)
     if problem is None:
         raise Http404

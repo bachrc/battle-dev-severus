@@ -36,5 +36,10 @@ class Probleme(models.Model):
 
     def validate_for_user(self, user):
         from lobby.models import BonneReponse
-        
+
         BonneReponse.objects.create(probleme=self, utilisateur=user)
+
+    def store_invalid_answer(self, user, answer):
+        from lobby.models import MauvaiseReponse
+
+        MauvaiseReponse.objects.create(probleme=self, utilisateur=user, reponse_donnee=answer)

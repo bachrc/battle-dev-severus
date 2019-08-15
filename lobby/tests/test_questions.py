@@ -4,7 +4,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from lobby.models import Question, Probleme, BonneReponse
+from lobby.models import Question, Probleme, BonneReponse, MauvaiseReponse
 from users.models import Utilisateur
 from users.tests.auth_utils import compute_auth_header
 
@@ -214,6 +214,27 @@ class ProblemsTest(APITestCase):
         self.assertEqual(BonneReponse.objects.count(), 1)
 
         bonne_reponse: BonneReponse = BonneReponse.objects.first()
-        
+
         self.assertEqual(bonne_reponse.probleme, self.probleme1)
         self.assertEqual(bonne_reponse.utilisateur, self.utilisateur1)
+
+    def test_should_store_when_a_bad_answer_is_given(self):
+        self.setupClassicProblems()
+
+        url = reverse('submit-answer', kwargs={'problem_id': ID_PROBLEME_1})
+        auth_headers = compute_auth_header(self.client, MAIL_UTILISATEUR_1, PASS_UTILISATEUR_1)
+        bad_answer = "la mer noire"
+
+        response = self.client.post(url, format='json', data={
+            "reponse": bad_answer
+        }, **auth_headers)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertFalse(response.data["correct"])
+        self.assertEqual(MauvaiseReponse.objects.count(), 1)
+
+        mauvaise_reponse: MauvaiseReponse = MauvaiseReponse.objects.first()
+
+        self.assertEqual(mauvaise_reponse.utilisateur, self.utilisateur1)
+        self.assertEqual(mauvaise_reponse.probleme, self.probleme1)
+        self.assertEqual(mauvaise_reponse.reponse_donnee, bad_answer)
