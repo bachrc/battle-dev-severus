@@ -53,7 +53,7 @@ class ProblemAnswer(APIView):
         if not question.is_correct_answer(answer):
             return Response(AnswerResult(correct=False, details="Réponse incorrecte.").data)
 
-        problem.validate_for_user(user, answer)
+        problem.validate_for_user(user)
 
         return Response(AnswerResult(correct=True, details="Bonne réponse, bravo !").data)
 

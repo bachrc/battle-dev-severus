@@ -197,3 +197,23 @@ class ProblemsTest(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertTrue(response.data["correct"])
+
+    def test_should_create_a_good_answer_when_given(self):
+        self.setupClassicProblems()
+
+        url = reverse('submit-answer', kwargs={'problem_id': ID_PROBLEME_1})
+        auth_headers = compute_auth_header(self.client, MAIL_UTILISATEUR_1, PASS_UTILISATEUR_1)
+        good_answer = self.probleme1.get_question(self.utilisateur1.id).reponse
+
+        response = self.client.post(url, format='json', data={
+            "reponse": good_answer
+        }, **auth_headers)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(response.data["correct"])
+        self.assertEqual(BonneReponse.objects.count(), 1)
+
+        bonne_reponse: BonneReponse = BonneReponse.objects.first()
+        
+        self.assertEqual(bonne_reponse.probleme, self.probleme1)
+        self.assertEqual(bonne_reponse.utilisateur, self.utilisateur1)

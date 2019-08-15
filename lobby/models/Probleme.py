@@ -34,5 +34,7 @@ class Probleme(models.Model):
 
         return BonneReponse.objects.filter(probleme=previous_problem, utilisateur=user).exists()
 
-    def validate_for_user(self, user, answer):
-        pass
+    def validate_for_user(self, user):
+        from lobby.models import BonneReponse
+        
+        BonneReponse.objects.create(probleme=self, utilisateur=user)
