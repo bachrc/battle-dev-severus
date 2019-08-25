@@ -106,6 +106,22 @@ paths:
         404:
           description: "Problem not found"
 
+  /battle-dev:
+    get:
+      tags:
+        - "battle-dev"
+      summary: "Retrieves informations on the current or next battle dev"
+      operationId: "getCurrentBattleDev"
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BattleDev"
+
   /login:
     post:
       tags:
@@ -221,3 +237,15 @@ components:
           type: boolean
         details:
           type: string
+
+    BattleDev:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        nom:
+          type: string
+        date-debut:
+          type: string
+          format: 'date-time'
