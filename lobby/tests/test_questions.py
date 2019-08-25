@@ -1,10 +1,12 @@
 import logging
+from datetime import timedelta
 
 from django.urls import reverse
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from lobby.models import Question, Probleme, BonneReponse, MauvaiseReponse
+from lobby.models import Question, Probleme, BonneReponse, MauvaiseReponse, BattleDev
 from users.models import Utilisateur
 from users.tests.auth_utils import compute_auth_header
 
@@ -238,3 +240,23 @@ class ProblemsTest(APITestCase):
         self.assertEqual(mauvaise_reponse.utilisateur, self.utilisateur1)
         self.assertEqual(mauvaise_reponse.probleme, self.probleme1)
         self.assertEqual(mauvaise_reponse.reponse_donnee, bad_answer)
+
+    def test_should_retrieve_correct_informations_about_current_battle_dev(self):
+        self.setupClassicProblems()
+
+        id_battle_dev = 1
+        nom_battle_dev = "Michel"
+        maintenant = timezone.now()
+        date_debut = maintenant + timedelta(days=2)
+        date_fin = maintenant + timedelta(days=3)
+
+        BattleDev.objects.create(id=id_battle_dev, nom=nom_battle_dev, date_debut=date_debut, date_fin=date_fin)
+
+        url = reverse('battle-dev')
+        auth_headers = compute_auth_header(self.client, MAIL_UTILISATEUR_1, PASS_UTILISATEUR_1)
+        response = self.client.get(url, format='json', **auth_headers)
+
+        self.assertEqual(response.data["id"], id_battle_dev)
+        self.assertEqual(response.data["nom"], nom_battle_dev)
+        self.assertEqual(response.data["date_debut"], date_debut.isoformat())
+        self.assertEqual(response.data["date_fin"], date_fin.isoformat())

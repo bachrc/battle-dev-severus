@@ -249,3 +249,6 @@ components:
         date-debut:
           type: string
           format: 'date-time'
+        date_fin:
+          type: string
+          format: 'date-time'
