@@ -43,7 +43,7 @@ class ProblemsById(APIView):
 
 
 class ProblemAnswer(APIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, BattleDevHasBegan)
 
     def post(self, request, problem_id: int):
         user = request.user

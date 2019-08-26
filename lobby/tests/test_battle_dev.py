@@ -103,3 +103,20 @@ class ProblemsTest(APITestCase):
         response = self.client.get(url, format='json', **auth_headers)
 
         self.assertEqual(response.status_code, 403)
+
+    def test_should_not_answer_a_problem_before_battle_dev_beginning(self):
+        BattleDev.objects.create(
+            nom="Battle Dev La Combe 2000",
+            date_debut=timezone.now() + timedelta(days=1),
+            date_fin=timezone.now() + timedelta(days=2)
+        )
+
+        url = reverse('submit-answer', kwargs={'problem_id': self.probleme1.id})
+        auth_headers = compute_auth_header(self.client, MAIL_UTILISATEUR_1, PASS_UTILISATEUR_1)
+        good_answer = self.probleme1.get_question(self.utilisateur1.id).reponse
+
+        response = self.client.post(url, format='json', data={
+            "reponse": good_answer
+        }, **auth_headers)
+
+        self.assertEqual(response.status_code, 403)
