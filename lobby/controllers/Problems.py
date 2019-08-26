@@ -24,7 +24,7 @@ class ProblemsList(APIView):
 
 
 class ProblemsById(APIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, BattleDevHasBegan)
 
     def get(self, request, problem_id: int):
         user = request.user
