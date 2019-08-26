@@ -10,13 +10,10 @@ from lobby.models import Question, Probleme, BonneReponse, MauvaiseReponse, Batt
 from users.models import Utilisateur
 from users.tests.auth_utils import compute_auth_header
 
-PASS_UTILISATEUR_2 = "miammanger"
-
-MAIL_UTILISATEUR_2 = "c.lignac@live.fr"
-
-PASS_UTILISATEUR_1 = "intraitable"
-
 MAIL_UTILISATEUR_1 = "p.martinet@live.fr"
+PASS_UTILISATEUR_1 = "intraitable"
+MAIL_UTILISATEUR_2 = "c.lignac@live.fr"
+PASS_UTILISATEUR_2 = "miammanger"
 
 ID_PROBLEME_1 = 1
 ID_PROBLEME_2 = 2
@@ -50,6 +47,11 @@ class ProblemsTest(APITestCase):
                                                             email=MAIL_UTILISATEUR_2, password=PASS_UTILISATEUR_2)
 
     def setupClassicProblems(self):
+        BattleDev.objects.create(
+            nom="Battle Dev La Combe 2000",
+            date_debut=timezone.now() - timedelta(hours=1),
+            date_fin=timezone.now() + timedelta(hours=2)
+        )
         self.question1 = Question.objects.create(intitule=INTITULE_QUESTION_1, reponse=REPONSE_QUESTION_1)
         self.question2 = Question.objects.create(intitule=INTITULE_QUESTION_2, reponse=REPONSE_QUESTION_2)
         self.question3 = Question.objects.create(intitule=INTITULE_QUESTION_3, reponse=REPONSE_QUESTION_3)
@@ -65,14 +67,9 @@ class ProblemsTest(APITestCase):
                                                  index=3)
         self.probleme3.questions.add(self.question4)
 
-    def setUpOrderedProblems(self):
-        self.probleme1 = Probleme.objects.create(id=12, titre="eh oui", contenu="on voit pas", index=3)
-        self.probleme2 = Probleme.objects.create(id=13, titre="c'est un probleme", contenu="on voit pas", index=2)
-        self.probleme3 = Probleme.objects.create(id=14, titre="epoustouflan", contenu="on voit pas", index=1)
-
     def setupProblemsWithAGoodAnswer(self):
-        self.setUpOrderedProblems()
-        BonneReponse.objects.create(probleme=self.probleme3, utilisateur=self.utilisateur1)
+        self.setupClassicProblems()
+        BonneReponse.objects.create(probleme=self.probleme1, utilisateur=self.utilisateur1)
 
     # test methods
 
@@ -112,23 +109,23 @@ class ProblemsTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_should_respect_questions_order(self):
-        self.setUpOrderedProblems()
+        self.setupClassicProblems()
 
         url = reverse('problems-list')
         auth_headers = compute_auth_header(self.client, MAIL_UTILISATEUR_1, PASS_UTILISATEUR_1)
         response = self.client.get(url, format='json', **auth_headers)
 
         self.assertEqual(len(response.data), 3)
-        self.assertEqual(response.data[0]["id"], 14)
-        self.assertEqual(response.data[1]["id"], 13)
-        self.assertEqual(response.data[2]["id"], 12)
+        self.assertEqual(response.data[0]["id"], ID_PROBLEME_1)
+        self.assertEqual(response.data[1]["id"], ID_PROBLEME_2)
+        self.assertEqual(response.data[2]["id"], ID_PROBLEME_3)
 
         self.assertEqual(response.data[0]["index"], 1)
         self.assertEqual(response.data[1]["index"], 2)
         self.assertEqual(response.data[2]["index"], 3)
 
     def test_should_indicate_accessible_problems_and_those_who_arent(self):
-        self.setUpOrderedProblems()
+        self.setupClassicProblems()
 
         url = reverse('problems-list')
         auth_headers = compute_auth_header(self.client, MAIL_UTILISATEUR_1, PASS_UTILISATEUR_1)
@@ -152,7 +149,7 @@ class ProblemsTest(APITestCase):
     def test_shouldnt_allow_consulting_a_problem_which_isnt_unlocked(self):
         self.setupProblemsWithAGoodAnswer()
 
-        url = reverse('problem-by-id', kwargs={'problem_id': 12})
+        url = reverse('problem-by-id', kwargs={'problem_id': ID_PROBLEME_3})
         auth_headers = compute_auth_header(self.client, MAIL_UTILISATEUR_1, PASS_UTILISATEUR_1)
         response = self.client.get(url, format='json', **auth_headers)
 
@@ -240,23 +237,3 @@ class ProblemsTest(APITestCase):
         self.assertEqual(mauvaise_reponse.utilisateur, self.utilisateur1)
         self.assertEqual(mauvaise_reponse.probleme, self.probleme1)
         self.assertEqual(mauvaise_reponse.reponse_donnee, bad_answer)
-
-    def test_should_retrieve_correct_informations_about_current_battle_dev(self):
-        self.setupClassicProblems()
-
-        id_battle_dev = 1
-        nom_battle_dev = "Michel"
-        maintenant = timezone.now()
-        date_debut = maintenant + timedelta(days=2)
-        date_fin = maintenant + timedelta(days=3)
-
-        BattleDev.objects.create(id=id_battle_dev, nom=nom_battle_dev, date_debut=date_debut, date_fin=date_fin)
-
-        url = reverse('battle-dev')
-        auth_headers = compute_auth_header(self.client, MAIL_UTILISATEUR_1, PASS_UTILISATEUR_1)
-        response = self.client.get(url, format='json', **auth_headers)
-
-        self.assertEqual(response.data["id"], id_battle_dev)
-        self.assertEqual(response.data["nom"], nom_battle_dev)
-        self.assertEqual(response.data["date_debut"], date_debut.isoformat())
-        self.assertEqual(response.data["date_fin"], date_fin.isoformat())

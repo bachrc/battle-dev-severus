@@ -6,10 +6,11 @@ from rest_framework.views import APIView
 
 from lobby.dto.problems import ProblemContent as ProblemDTO, ProblemAbridged, AnswerResult
 from lobby.models import Probleme
+from lobby.permissions import BattleDevHasBegan
 
 
 class ProblemsList(APIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, BattleDevHasBegan)
 
     def get(self, request):
         problems = Probleme.objects.all().order_by('index')
