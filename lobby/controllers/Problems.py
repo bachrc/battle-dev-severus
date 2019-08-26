@@ -1,12 +1,11 @@
 from django.http import Http404
-from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from lobby.dto.problems import ProblemContent as ProblemDTO, ProblemAbridged, AnswerResult
 from lobby.models import Probleme
-from lobby.permissions import BattleDevHasBegan
+from lobby.permissions import BattleDevHasBegan, CanAccessProblem
 
 
 class ProblemsList(APIView):
@@ -24,11 +23,11 @@ class ProblemsList(APIView):
 
 
 class ProblemsById(APIView):
-    permission_classes = (IsAuthenticated, BattleDevHasBegan)
+    permission_classes = (IsAuthenticated, BattleDevHasBegan, CanAccessProblem)
 
     def get(self, request, problem_id: int):
         user = request.user
-        problem = get_problem_if_allowed(problem_id, user)
+        problem = get_problem_if_available(problem_id)
 
         question = problem.get_question(user.id)
 
@@ -43,11 +42,11 @@ class ProblemsById(APIView):
 
 
 class ProblemAnswer(APIView):
-    permission_classes = (IsAuthenticated, BattleDevHasBegan)
+    permission_classes = (IsAuthenticated, BattleDevHasBegan, CanAccessProblem)
 
     def post(self, request, problem_id: int):
         user = request.user
-        problem = get_problem_if_allowed(problem_id, user)
+        problem = get_problem_if_available(problem_id)
         question = problem.get_question(user.id)
         answer = request.data["reponse"]
 
@@ -60,10 +59,9 @@ class ProblemAnswer(APIView):
         return Response(AnswerResult(correct=True, details="Bonne réponse, bravo !").data)
 
 
-def get_problem_if_allowed(problem_id, user) -> Probleme:
+def get_problem_if_available(problem_id) -> Probleme:
     problem = Probleme.objects.get(id=problem_id)
     if problem is None:
         raise Http404
-    if not problem.is_problem_unlocked_for_user(user):
-        raise PermissionDenied("Vous n'êtes pas autorisé(e) à consulter ce problème.")
+
     return problem
