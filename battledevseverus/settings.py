@@ -19,12 +19,12 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '&z-%t1%6k(kjh4)ul)ziu@_5bf_$pkc7dg23w(#aynj=xs84*2'
+SECRET_KEY = os.environ.get("SEVERUS_SECRET_KEY", '&z-%t1%6k(kjh4)ul)ziu@_5bf_$pkc7dg23w(#aynj=xs84*2')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = bool(os.environ.get('SEVERUS_DEBUG', '0') == '1')
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '[::1]']
 
 # Application definition
 
@@ -96,8 +96,13 @@ WSGI_APPLICATION = 'battledevseverus.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': os.environ.get('SEVERUS_APP_DB_ENGINE', 'django.db.backends.sqlite3'),
+        'NAME': os.environ.get('SEVERUS_DB_NAME', os.path.join(BASE_DIR, 'db.sqlite3')),
+        'USER': os.environ.get('SEVERUS_DB_USER', ''),
+        'PASSWORD': os.environ.get('SEVERUS_DB_PASSWORD', ''),
+        'HOST': os.environ.get('SEVERUS_DB_HOST', None),
+        'PORT': os.environ.get('SEVERUS_DB_PORT', None),
+        'CONN_MAX_AGE': 600,
     }
 }
 
