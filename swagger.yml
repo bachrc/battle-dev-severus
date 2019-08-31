@@ -246,6 +246,8 @@ components:
           format: int64
         nom:
           type: string
+        description:
+          type: string
         date-debut:
           type: string
           format: 'date-time'

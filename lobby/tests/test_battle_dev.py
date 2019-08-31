@@ -63,11 +63,13 @@ class ProblemsTest(APITestCase):
     def test_should_retrieve_correct_informations_about_current_battle_dev(self):
         id_battle_dev = 1
         nom_battle_dev = "Michel"
+        description_battle_dev = "Je suis seul"
         maintenant = timezone.now()
         date_debut = maintenant + timedelta(days=2)
         date_fin = maintenant + timedelta(days=3)
 
-        BattleDev.objects.create(id=id_battle_dev, nom=nom_battle_dev, date_debut=date_debut, date_fin=date_fin)
+        BattleDev.objects.create(id=id_battle_dev, nom=nom_battle_dev, description=description_battle_dev,
+                                 date_debut=date_debut, date_fin=date_fin)
 
         url = reverse('battle-dev')
         auth_headers = compute_auth_header(self.client, MAIL_UTILISATEUR_1, PASS_UTILISATEUR_1)
@@ -75,6 +77,7 @@ class ProblemsTest(APITestCase):
 
         self.assertEqual(response.data["id"], id_battle_dev)
         self.assertEqual(response.data["nom"], nom_battle_dev)
+        self.assertEqual(response.data["description"], description_battle_dev)
         self.assertEqual(response.data["date_debut"], date_debut.isoformat())
         self.assertEqual(response.data["date_fin"], date_fin.isoformat())
 
