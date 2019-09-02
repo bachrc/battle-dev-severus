@@ -4,7 +4,7 @@ from django.utils import timezone
 
 class BattleDev(models.Model):
     nom = models.CharField(max_length=200)
-    description = models.CharField(max_length=5000)
+    description = models.TextField(max_length=5000)
     date_debut = models.DateTimeField()
     date_fin = models.DateTimeField()
 
