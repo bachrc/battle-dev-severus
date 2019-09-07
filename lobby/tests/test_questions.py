@@ -1,8 +1,14 @@
 import logging
+import os
+import shutil
+import tempfile
 from datetime import timedelta
+from pathlib import Path
 
+from django.test import override_settings
 from django.urls import reverse
 from django.utils import timezone
+from django.core.files.uploadedfile import SimpleUploadedFile
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -36,9 +42,16 @@ INTITULE_QUESTION_4 = "Comment les abeilles communiquent-elles ?"
 REPONSE_QUESTION_4 = "Par e-miel"
 
 logger = logging.getLogger(__name__)
+MEDIA_ROOT = tempfile.mkdtemp()
 
 
+@override_settings(MEDIA_ROOT=MEDIA_ROOT)
 class ProblemsTest(APITestCase):
+
+    @classmethod
+    def tearDownClass(cls):
+        shutil.rmtree(MEDIA_ROOT, ignore_errors=True)
+        super().tearDownClass()
 
     def setUp(self) -> None:
         self.utilisateur1 = Utilisateur.objects.create_user(id=1, last_name="Martinet", first_name="Pierre",
@@ -57,14 +70,25 @@ class ProblemsTest(APITestCase):
         self.question3 = Question.objects.create(intitule=INTITULE_QUESTION_3, reponse=REPONSE_QUESTION_3)
         self.question4 = Question.objects.create(intitule=INTITULE_QUESTION_4, reponse=REPONSE_QUESTION_4)
 
+        current_dir = Path(os.path.dirname(os.path.realpath(__file__)))
+
+        self.imageProbleme1 = SimpleUploadedFile(name='fernando1.png',
+                                                 content=open(current_dir / "images" / "fernando1.png", 'rb').read(),
+                                                 content_type='image/png')
+        self.imageProbleme2 = SimpleUploadedFile(name='fernando2.jpg',
+                                                 content=open(current_dir / "images" / "fernando2.jpg", 'rb').read(),
+                                                 content_type='image/jpeg')
+        self.imageProbleme3 = SimpleUploadedFile(name='fernando3.jpg',
+                                                 content=open(current_dir / "images" / "fernando3.jpg", 'rb').read(),
+                                                 content_type='image/jpeg')
         self.probleme1 = Probleme.objects.create(id=ID_PROBLEME_1, titre=TITRE_PROBLEME_1, contenu=CONTENU_PROBLEME_1,
-                                                 index=1)
+                                                 index=1, image=self.imageProbleme1)
         self.probleme1.questions.add(self.question1, self.question2)
         self.probleme2 = Probleme.objects.create(id=ID_PROBLEME_2, titre=TITRE_PROBLEME_2, contenu=CONTENU_PROBLEME_2,
-                                                 index=2)
+                                                 index=2, image=self.imageProbleme2)
         self.probleme2.questions.add(self.question3)
         self.probleme3 = Probleme.objects.create(id=ID_PROBLEME_3, titre=TITRE_PROBLEME_3, contenu=CONTENU_PROBLEME_3,
-                                                 index=3)
+                                                 index=3, image=self.imageProbleme3)
         self.probleme3.questions.add(self.question4)
 
     def setupProblemsWithAGoodAnswer(self):
@@ -84,6 +108,8 @@ class ProblemsTest(APITestCase):
         self.assertContains(response=response, text=TITRE_PROBLEME_2)
         self.assertContains(response=response, text=ID_PROBLEME_1)
         self.assertContains(response=response, text=ID_PROBLEME_2)
+
+        self.assertEqual(response.data[0]["image_url"], self.probleme1.image.url)
 
     def test_should_get_problem_details(self):
         self.setupClassicProblems()

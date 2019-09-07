@@ -187,6 +187,8 @@ components:
           format: int32
         accessible:
           type: boolean
+        image_url:
+          type: string
     Problem:
       allOf:
         - $ref: '#/components/schemas/ProblemSummary'

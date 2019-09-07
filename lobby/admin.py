@@ -5,7 +5,7 @@ from .models import Probleme, Question
 
 
 class ProblemeAdmin(admin.ModelAdmin):
-    list_display = ('contenu',)
+    list_display = ('titre',)
 
 
 class QuestionAdmin(admin.ModelAdmin):

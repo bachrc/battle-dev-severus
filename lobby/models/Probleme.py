@@ -10,6 +10,7 @@ class Probleme(models.Model):
     contenu = models.TextField(max_length=10000)
     questions = models.ManyToManyField(Question, blank=True)
     index = models.IntegerField(null=False, unique=True)
+    image = models.ImageField()
 
     def get_question(self, user_id: int) -> Question:
         questions_ids = [question.id for question in self.questions.all()]

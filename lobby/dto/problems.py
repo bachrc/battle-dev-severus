@@ -11,12 +11,13 @@ class ProblemContent:
 
 
 class ProblemAbridged:
-    def __init__(self, id, titre, index, accessible):
+    def __init__(self, id, titre, index, accessible, image_url):
         self.accessible = accessible
         self.index = index
         self.titre = titre
         self.id = id
-
+        self.image_url = image_url
+        
     @property
     def data(self):
         return vars(self)

@@ -18,7 +18,8 @@ class ProblemsList(APIView):
             id=pb.id,
             titre=pb.titre,
             index=pb.index,
-            accessible=pb.is_problem_unlocked_for_user(request.user)
+            accessible=pb.is_problem_unlocked_for_user(request.user),
+            image_url=pb.image.url
         ).data for pb in problems])
 
 
