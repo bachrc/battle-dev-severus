@@ -6,6 +6,7 @@ from rest_framework.views import APIView
 from lobby.dto.problems import ProblemContent as ProblemDTO, ProblemAbridged, AnswerResult
 from lobby.models import Probleme
 from lobby.permissions import BattleDevHasBegan, CanAccessProblem
+from users.models import Utilisateur
 
 
 class ProblemsList(APIView):
@@ -14,13 +15,31 @@ class ProblemsList(APIView):
     def get(self, request):
         problems = Probleme.objects.all().order_by('index')
 
-        return Response([ProblemAbridged(
+        return Response([self._render_problem(pb, request.user) for pb in problems])
+
+    def _render_problem(self, pb: Probleme, user: Utilisateur):
+        if pb.is_problem_unlocked_for_user(user):
+            return self._render_unlocked_problem(pb).data
+
+        return self._render_locked_problem(pb).data
+
+    def _render_locked_problem(self, pb: Probleme):
+        return ProblemAbridged(
+            id=pb.id,
+            titre="",
+            index=pb.index,
+            accessible=False,
+            image_url=""
+        )
+
+    def _render_unlocked_problem(self, pb: Probleme):
+        return ProblemAbridged(
             id=pb.id,
             titre=pb.titre,
             index=pb.index,
-            accessible=pb.is_problem_unlocked_for_user(request.user),
+            accessible=True,
             image_url=pb.image.url
-        ).data for pb in problems])
+        )
 
 
 class ProblemsById(APIView):

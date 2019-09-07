@@ -105,11 +105,29 @@ class ProblemsTest(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertContains(response=response, text=TITRE_PROBLEME_1)
-        self.assertContains(response=response, text=TITRE_PROBLEME_2)
         self.assertContains(response=response, text=ID_PROBLEME_1)
         self.assertContains(response=response, text=ID_PROBLEME_2)
 
         self.assertEqual(response.data[0]["image_url"], self.probleme1.image.url)
+
+    def test_should_not_fetch_infos_on_not_unlocked_problems(self):
+        self.setupProblemsWithAGoodAnswer()
+
+        url = reverse('problems-list')
+        auth_headers = compute_auth_header(self.client, MAIL_UTILISATEUR_1, PASS_UTILISATEUR_1)
+        response = self.client.get(url, format='json', **auth_headers)
+
+        self.assertTrue(response.data[0]["accessible"])
+        self.assertEqual(TITRE_PROBLEME_1, response.data[0]["titre"])
+        self.assertEqual(self.probleme1.image.url, response.data[0]["image_url"])
+
+        self.assertTrue(response.data[1]["accessible"])
+        self.assertEqual(TITRE_PROBLEME_2, response.data[1]["titre"])
+        self.assertEqual(self.probleme2.image.url, response.data[1]["image_url"])
+
+        self.assertFalse(response.data[2]["accessible"])
+        self.assertEqual("", response.data[2]["titre"])
+        self.assertEqual("", response.data[2]["image_url"])
 
     def test_should_get_problem_details(self):
         self.setupClassicProblems()
