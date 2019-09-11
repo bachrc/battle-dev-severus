@@ -5,3 +5,4 @@ drf-jwt==1.13.0
 PyJWT==1.7.1
 pytz==2019.1
 sqlparse==0.3.0
+Pillow
